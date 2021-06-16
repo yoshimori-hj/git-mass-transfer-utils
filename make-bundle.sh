@@ -3,20 +3,20 @@
 set -e
 
 function die {
-	echo "(EE) $@" >&2
-	exit 1
+    echo "(EE) $@" >&2
+    exit 1
 }
 
 function warn {
-	echo "(!!) $@" >&2
+    echo "(!!) $@" >&2
 }
 
 function info {
-	echo "(**) $@" >&2
+    echo "(**) $@" >&2
 }
 
 function help {
-	cat <<EOF >&2
+    cat <<EOF >&2
 Enables file-based tranfer of git bundles like \`git push --mirror\` easily
 
 Usage: $0 commands...
@@ -72,54 +72,54 @@ EOF
 
 command=$1
 if [[ -z "$command" ]]; then
-	help
-	exit 1
+    help
+    exit 1
 fi
 case "$command" in
 help | -h | --help)
-	help
-	exit 1
-	;;
+    help
+    exit 1
+    ;;
 list | create | unbundle | replant-branch) ;;
 
 *)
-	die "Unknown command '$command'"
-	;;
+    die "Unknown command '$command'"
+    ;;
 esac
 shift
 
 function opt_parse {
-	local options=$1
-	shift
-	while l=$1; do
-		case "$l" in
-		--)
-			shift
-			break
-			;;
-		-*)
-			n=${options/:$1:/:$2:}
-			if [[ "$n" == "$options" ]]; then
-				die "Unknown argument '$l'"
-			fi
-			if [[ -z "$2" ]]; then
-				die "Parameter missing for option '$l'"
-			fi
+    local options=$1
+    shift
+    while l=$1; do
+        case "$l" in
+        --)
+            shift
+            break
+            ;;
+        -*)
+            n=${options/:$1:/:$2:}
+            if [[ "$n" == "$options" ]]; then
+                die "Unknown argument '$l'"
+            fi
+            if [[ -z "$2" ]]; then
+                die "Parameter missing for option '$l'"
+            fi
             if [[ "${2/:/;}" != "$2" ]]; then
                 die "Parameter cannot contain a colon for '$l'. Please try another name."
             fi
-			options="$n"
-			shift 2
-			;;
-		*)
-			break
-			;;
-		esac
-	done
-	if [[ $# -lt 1 ]]; then
-		die "No repository given for processing"
-	fi
-	echo "$options" "$@"
+            options="$n"
+            shift 2
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
+    if [[ $# -lt 1 ]]; then
+        die "No repository given for processing"
+    fi
+    echo "$options" "$@"
 }
 
 function list {
@@ -151,7 +151,7 @@ function create_bundle {
         info "Processing $repo..."
         reponame="$(basename "$(realpath "$repo")")"
         pushd "$repo" >/dev/null
-        git for-each-ref --format "${reponame} %(objectname) %(refname:rstrip=-2) %(refname:lstrip=2)" refs/heads refs/tags >>$f || \
+        git for-each-ref --format "${reponame} %(objectname) %(refname:rstrip=-2) %(refname:lstrip=2)" refs/heads refs/tags >>$f ||
             die "Failed to obtain refs for $repo"
         popd >/dev/null
         refs=$(awk '{if($1=="'"${reponame}"'") print $2}' $f)
@@ -236,13 +236,13 @@ function replant-branch {
                     if git merge --ff-only $rc; then
                         :
                     else
-                        git branch -m "$name" "$name@" || \
+                        git branch -m "$name" "$name@" ||
                             die "$repo: Failed to backup branch $name"
-                        git checkout -b "$name" $rc -- || \
+                        git checkout -b "$name" $rc -- ||
                             die "$repo: Failed to checkout new commit for $name"
                     fi
                 else
-                    git checkout -b "$name" $rc -- || \
+                    git checkout -b "$name" $rc -- ||
                         die "$repo: Failed to checkout new commit for $name"
                 fi
             fi
