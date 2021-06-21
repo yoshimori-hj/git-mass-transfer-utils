@@ -210,7 +210,7 @@ function unbundle {
             git bundle unbundle $bundle
         fi
         popd >/dev/null
-        xargs -0 -n 1 -a $f bash $- $0 replant-branch
+        xargs -0 -n 1 -a $f bash -$- $0 replant-branch
     done
 }
 
@@ -255,7 +255,7 @@ function replant-branch {
             git tag $name $rc
         fi
     fi
-    popd
+    popd >/dev/null
 }
 
 function _make_bundle_list {
@@ -270,11 +270,11 @@ function _make_bundle_create {
 
 function _make_bundle_unbundle {
     opt=$(opt_parse ':-l:-d:' $@)
-    unundle $opt
+    unbundle $opt
 }
 
 function _make_bundle_replant-branch {
-    eval "replant-branch \"$@\""
+    eval "replant-branch $@"
 }
 
 if [[ $(type -t _make_bundle_$command) != "function" ]]; then
