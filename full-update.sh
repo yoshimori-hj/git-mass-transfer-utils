@@ -38,12 +38,12 @@ else
     remote=origin
 fi
 
-if [[ -z "$SSH_AGENT_PID" ]]; then
+if [[ -z $SSH_AGENT_PID ]]; then
     eval $(ssh-agent)
     trap "kill -TERM $SSH_AGENT_PID" 0 1 2
 fi
 
-if [[ ! -z "$SSH_AGENT_PID" ]]; then
+if [[ -n $SSH_AGENT_PID ]]; then
     ssh-add || :
 fi
 
@@ -66,7 +66,7 @@ function replant-branch {
     info "'$dir': Branch $br..."
     local lc=$(git log -n1 --format=%H "$br")
     local rc=$(git log -n1 --format=%H "$remote/$br")
-    if [[ "$lc" != "$rc" ]]; then
+    if [[ $lc != "$rc" ]]; then
         if git rev-list "$br" | grep "$rc" 1>/dev/null 2>/dev/null; then
             warn "'$dir': Branch $br is newer than remote"
         else
@@ -101,7 +101,7 @@ function update-repo {
     popd >/dev/null
 }
 
-while [[ ! -z "$1" ]]; do
+while [[ -n $1 ]]; do
     update-repo "$1"
     shift
 done

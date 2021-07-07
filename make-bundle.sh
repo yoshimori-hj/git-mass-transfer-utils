@@ -71,7 +71,7 @@ EOF
 }
 
 command=$1
-if [[ -z "$command" ]]; then
+if [[ -z $command ]]; then
     help
     exit 1
 fi
@@ -99,13 +99,13 @@ function opt_parse {
             ;;
         -*)
             n=${options/:$1:/:$2:}
-            if [[ "$n" == "$options" ]]; then
+            if [[ $n == "$options" ]]; then
                 die "Unknown argument '$l'"
             fi
-            if [[ -z "$2" ]]; then
+            if [[ -z $2 ]]; then
                 die "Parameter missing for option '$l'"
             fi
-            if [[ "${2/:/;}" != "$2" ]]; then
+            if [[ ${2/:/;} != "$2" ]]; then
                 die "Parameter cannot contain a colon for '$l'. Please try another name."
             fi
             options="$n"
@@ -178,7 +178,7 @@ function create_bundle {
                     fi
                 done
             done
-            if [[ -z "$nots" ]]; then
+            if [[ -z $nots ]]; then
                 m="complete bundle "
             else
                 m=""
@@ -219,7 +219,7 @@ function replant-branch {
     rc=$2
     kind=$3
     name=$4
-    if [[ "$kind" == "refs/heads" ]]; then
+    if [[ $kind == "refs/heads" ]]; then
         kind=branch
     else
         kind=tag
@@ -227,8 +227,8 @@ function replant-branch {
     pushd $repo >/dev/null
     info "$repo: Processing $kind $name..."
     lc=$(git rev-parse $name || :)
-    if [[ "$lc" != "$rc" ]]; then
-        if [[ "$kind" == "branch" ]]; then
+    if [[ $lc != "$rc" ]]; then
+        if [[ $kind == "branch" ]]; then
             if git rev-list "$name" | grep -Fq $rc; then
                 warn "$repo: Branch $name is newer than bundle (remote)"
             else
@@ -247,7 +247,7 @@ function replant-branch {
                 fi
             fi
         else
-            if [[ ! -z "lc" ]]; then
+            if [[ -n "lc" ]]; then
                 warn "$repo: Tag $name already exists with different commit"
                 git tag $name@ $lc
                 git tag -d $name

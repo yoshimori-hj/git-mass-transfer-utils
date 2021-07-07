@@ -38,12 +38,12 @@ else
     remote=origin
 fi
 
-if [[ -z "$SSH_AGENT_PID" ]]; then
+if [[ -z $SSH_AGENT_PID ]]; then
     eval $(ssh-agent)
     trap "kill -TERM $SSH_AGENT_PID" 0 1 2
 fi
 
-if [[ ! -z "$SSH_AGENT_PID" ]]; then
+if [[ -n $SSH_AGENT_PID ]]; then
     ssh-add || :
 fi
 
@@ -56,7 +56,7 @@ function update-repo {
     popd >/dev/null
 }
 
-while [[ ! -z "$1" ]]; do
+while [[ -n $1 ]]; do
     update-repo "$1"
     shift
 done
