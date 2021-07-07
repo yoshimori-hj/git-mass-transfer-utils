@@ -2,9 +2,10 @@
 
 ## `full-update.sh`
 
-Pull from remote repository and create local branches to points the
-remote repository for all remote branches. If the name already exists
-and not ff, local branches will be renamed with adding `@` on tail.
+This script pulls from a remote repository and creates local branches
+for each branch in the remote repository. If the name already exists
+and not ff, local branches will be renamed to the one with adding `@`
+on the tail.
 
 ```
 Usage: ./full-update.sh [-r remote] DIRS...
@@ -20,7 +21,7 @@ every time.
 
 ## `full-push.sh`
 
-This scripts just run following for all given repositories.
+This script just runs following for all given repositories.
 
 ```
 git push $remote --all
@@ -29,8 +30,9 @@ git push $remote --tags
 
 ## `make-bundle.sh`
 
-Same functionality for `full-update.sh` over machines without direct
-network connectivity. Using git bundles for transfer.
+This script provides the same functionality as `full-update.sh` between 
+machines without direct network connectivity. It uses git bundles for
+transfer.
 
 ```
 nables file-based tranfer of git bundles like `git push --mirror` easily
