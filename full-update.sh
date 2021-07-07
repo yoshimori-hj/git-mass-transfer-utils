@@ -39,16 +39,17 @@ else
 fi
 
 if [[ -z "$SSH_AGENT_PID" ]]; then
-  eval `ssh-agent`
-  trap "kill -TERM $SSH_AGENT_PID" 0 1 2
+    eval $(ssh-agent)
+    trap "kill -TERM $SSH_AGENT_PID" 0 1 2
 fi
 
 if [[ ! -z "$SSH_AGENT_PID" ]]; then
-  ssh-add || :
+    ssh-add || :
 fi
 
 function get-branches {
-    git for-each-ref | awk -F' ' -f <(cat <<EOF
+    git for-each-ref | awk -F' ' -f <(
+        cat <<EOF
 /refs\/remotes\/$remote\// {
   b = gensub(/refs\/remotes\/[^/]*\//, "", "g", \$3)
   if (b != "HEAD" && gensub(/^2019\//, "", "g", b) == b) {
@@ -56,7 +57,7 @@ function get-branches {
   }
 }
 EOF
-)
+    )
 }
 
 function replant-branch {
@@ -73,17 +74,17 @@ function replant-branch {
                 :
             else
                 if git branch -m "$br" "$br@" --; then
-                    git checkout "$br" -- || \
-                    git checkout --track "$remote/$br" || \
-                    die "'$dir': Failed to checkout new commit"
+                    git checkout "$br" -- ||
+                        git checkout --track "$remote/$br" ||
+                        die "'$dir': Failed to checkout new commit"
                 else
                     die "'$dir': Backup branch $br failed"
                 fi
             fi
             if git branch | grep "$br@" 2>/dev/null 1>/dev/null; then
-                git branch -d "$br@" || \
+                git branch -d "$br@" ||
                     warn "'$dir': Merge required on branch $br"
-	        fi
+            fi
         fi
     fi
 }
@@ -104,4 +105,3 @@ while [[ ! -z "$1" ]]; do
     update-repo "$1"
     shift
 done
-
