@@ -80,7 +80,7 @@ help | -h | --help)
     help
     exit 1
     ;;
-list | create | unbundle | replant-branch) ;;
+list | create | unbundle) ;;
 
 *)
     die "Unknown command '$command'"
@@ -192,46 +192,47 @@ function create_bundle {
     cp $f $list_file
 }
 
-function unbundle {
-    opt=$1
-    shift
-    list_file=$(echo "$opt" | cut -f2 -d:)
-    bundle_dir=$(echo "$opt" | cut -f3 -d:)
-    f=$(realpath $(mktemp))
-    trap "rm -f $f" 0 1 2
-    while repo=$1 && shift; do
-        info "Processing $repo..."
-        reponame="$(basename "$(realpath "$repo")")"
-        bundle=$(realpath $bundle_dir/$reponame.bundle)
-        awk '{if($1=="'"${reponame}"'") printf("%s\0", $0)}' $list_file >$f
-        pushd $repo >/dev/null
-        if [[ -r $bundle ]]; then
-            info "Extracting bundle..."
-            git bundle unbundle $bundle
-        fi
-        popd >/dev/null
-        xargs -0 -n 1 -a $f bash -$- $0 replant-branch
-    done
+function do_bundle_unbundle {
+    local repo=$1
+    local bundle=$2
+    if [[ $bundle_unbundled == 0 ]]; then
+        return
+    fi
+    if [[ ! -e "$bundle" ]]; then
+        warn "$repo: A git bundle required to checkout required commits, but not found"
+        return
+    fi
+
+    info "$repo: Extracting bundle..."
+    git bundle unbundle $bundle ||
+        die "$repo: Failed to unbundle $bundle"
+    bundle_unbundled=0
 }
 
 function replant-branch {
-    repo=$1
-    rc=$2
-    kind=$3
-    name=$4
+    local target_repo=$1
+    local bundle=$2
+    local repo=$3
+    local rc=$4
+    local kind=$5
+    local name=$6
+    if [[ $repo != $target_repo ]]; then
+        return
+    fi
+
     if [[ $kind == "refs/heads" ]]; then
         kind=branch
     else
         kind=tag
     fi
-    pushd $repo >/dev/null
     info "$repo: Processing $kind $name..."
     lc=$(git rev-parse $name || :)
     if [[ $lc != "$rc" ]]; then
         if [[ $kind == "branch" ]]; then
-            if git rev-list "$name" | grep -Fq $rc; then
+            if git branch --contain "$rc" 2>/dev/null | grep -Fq "$name"; then
                 warn "$repo: Branch $name is newer than bundle (remote)"
             else
+                do_bundle_unbundle "$repo" "$bundle"
                 if git checkout "$name" --; then
                     if git merge --ff-only $rc; then
                         :
@@ -252,11 +253,32 @@ function replant-branch {
                 git tag $name@ $lc
                 git tag -d $name
             fi
+            do_bundle_unbundle "$repo" "$bundle"
             git tag $name $rc
         fi
     fi
-    popd >/dev/null
 }
+
+function unbundle {
+    opt=$1
+    shift
+    list_file=$(echo "$opt" | cut -f2 -d:)
+    bundle_dir=$(echo "$opt" | cut -f3 -d:)
+    while repo=$1 && shift; do
+        info "Processing $repo..."
+        reponame="$(basename "$(realpath "$repo")")"
+        bundle=$(realpath $bundle_dir/$reponame.bundle)
+        bundle_unbundled=1
+        exec 99<$list_file
+        pushd $repo >/dev/null
+        while read LINE <&99; do
+            eval "replant-branch $repo $bundle $LINE"
+        done
+        popd >/dev/null
+        exec 99<&-
+    done
+}
+
 
 function _make_bundle_list {
     opt=$(opt_parse ':-l:' $@)
@@ -271,10 +293,6 @@ function _make_bundle_create {
 function _make_bundle_unbundle {
     opt=$(opt_parse ':-l:-d:' $@)
     unbundle $opt
-}
-
-function _make_bundle_replant-branch {
-    eval "replant-branch $@"
 }
 
 if [[ $(type -t _make_bundle_$command) != "function" ]]; then
