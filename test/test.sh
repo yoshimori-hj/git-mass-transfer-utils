@@ -117,9 +117,9 @@ popd
 
 pushd local
 for dd in l1 l2 l3; do
-    pushd $dd
-    git for-each-ref refs/heads
-    popd
+  pushd $dd
+  git for-each-ref refs/heads
+  popd
 done
 
 [[ $l1_br_a == $(cd l1 && git rev-parse br-a) ]] || exit 1
