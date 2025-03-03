@@ -18,7 +18,7 @@ function info {
 realpath=$(type -p realpath || type -p grealpath || die "realpath or grealpath required")
 
 function show_list_help {
-    cat <<EOF >&2
+  cat <<EOF >&2
 Usage: $0 list -l REF-LIST-FILE REPOSITORY...
 
 Options:
@@ -29,7 +29,7 @@ EOF
 }
 
 function show_create_help {
-    cat <<EOF >&2
+  cat <<EOF >&2
 Usage: $0 create -l REF-LIST-FILE -d DIR REPOSITORY...
 
 Options:
@@ -43,7 +43,7 @@ EOF
 }
 
 function show_unbundle_help {
-    cat <<EOF >&2
+  cat <<EOF >&2
 Usage: $0 unbundle -d BUNDLE-DIR -l REF-LIST-FILE REPOSITORY...
 
 Options:
@@ -129,8 +129,8 @@ function apply {
       while getopts "$opts" N; do
         :
       done
-      args="${@:1:$((OPTIND-1))}"
-      shift $((OPTIND-1))
+      args="${@:1:$((OPTIND - 1))}"
+      shift $((OPTIND - 1))
     else
       args=
     fi
@@ -155,11 +155,14 @@ function _make_bundle_list {
   list_file=
   while getopts "l:h?" N; do
     case "$N" in
-      l)   list_file="$OPTARG";;
-      ?|h) show_list_help; exit 2;;
+    l) list_file="$OPTARG" ;;
+    ? | h)
+      show_list_help
+      exit 2
+      ;;
     esac
   done
-  shift $((OPTIND-1))
+  shift $((OPTIND - 1))
 
   [[ -z "$list_file" ]] && die "No list file name given"
   [[ ! -e "$list_file" || -f "$list_file" ]] ||
@@ -220,12 +223,15 @@ function _make_bundle_create {
   bundle_dir=.
   while getopts "l:d:h?" N; do
     case "$N" in
-      l)   list_file="$OPTARG";;
-      d)   bundle_dir="$OPTARG";;
-      ?|h) show_create_help; exit 2;;
+    l) list_file="$OPTARG" ;;
+    d) bundle_dir="$OPTARG" ;;
+    ? | h)
+      show_create_help
+      exit 2
+      ;;
     esac
   done
-  shift $((OPTIND-1))
+  shift $((OPTIND - 1))
 
   [[ -z "$list_file" ]] && die "No list file given"
   if [[ -e "$list_file" ]]; then
@@ -241,7 +247,7 @@ function _make_bundle_create {
   f=$($realpath $(mktemp))
   trap "rm -f $f" 0 1 2
   apply "create $(escape "$f") $(escape "$list_file") $(escape "$bundle_dir")" \
-        "" "$@"
+    "" "$@"
   cp $f $list_file
 }
 
@@ -312,7 +318,6 @@ function replant-branch {
   fi
 }
 
-
 function unbundle {
   list_file="$1"
   bundle_dir="$2"
@@ -333,12 +338,15 @@ function _make_bundle_unbundle {
   bundle_dir=.
   while getopts "l:d:h?" N; do
     case "$N" in
-      l)   list_file="$OPTARG";;
-      d)   bundle_dir="$OPTARG";;
-      ?|h) show_unbundle_help; exit 2;;
+    l) list_file="$OPTARG" ;;
+    d) bundle_dir="$OPTARG" ;;
+    ? | h)
+      show_unbundle_help
+      exit 2
+      ;;
     esac
   done
-  shift $((OPTIND-1))
+  shift $((OPTIND - 1))
 
   [[ -z "$list_file" ]] && die "No list file given"
   [[ ! -f "$list_file" ]] && die "$list_file: No such file"
