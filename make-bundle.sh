@@ -112,40 +112,6 @@ list | create | unbundle) ;;
 esac
 shift
 
-function opt_parse {
-  local options=$1
-  shift
-  while l=$1; do
-    case "$l" in
-    --)
-      shift
-      break
-      ;;
-    -*)
-      n=${options/:$1:/:$2:}
-      if [[ $n == "$options" ]]; then
-        die "Unknown argument '$l'"
-      fi
-      if [[ -z $2 ]]; then
-        die "Parameter missing for option '$l'"
-      fi
-      if [[ ${2/:/;} != "$2" ]]; then
-        die "Parameter cannot contain a colon for '$l'. Please try another name."
-      fi
-      options="$n"
-      shift 2
-      ;;
-    *)
-      break
-      ;;
-    esac
-  done
-  if [[ $# -lt 1 ]]; then
-    die "No repository given for processing"
-  fi
-  echo "$options" "$@"
-}
-
 function escape {
   m="$1"
   echo \'"${m//\'/\'\\\'\'}"\'
